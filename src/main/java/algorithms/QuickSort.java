@@ -28,6 +28,7 @@ public class QuickSort {
         int pivot = arr[startIndex];
         int i = startIndex + 1, j = endIndex;
         while (i < j) {
+            // 以第一个元素为pivot，那么就先从尾端开始遍历
             while (arr[j] > pivot && i < j) {
                 j--;
             }
@@ -36,7 +37,9 @@ public class QuickSort {
             }
             swap(arr, i, j);
         }
-        // i == j，这时候要看当前这个元素时
+        // i == j，因为pivot时在左边，这时候就看当前元素是不是小于或者等于pivot
+        // 如果是，则直接交换，当前index就是分界点
+        // 如果不是，那么就不需要交换，但是分界点则是j的前一个
         if (arr[j] <= pivot) {
             swap(arr, i, startIndex);
         } else {
