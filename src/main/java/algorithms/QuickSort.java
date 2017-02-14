@@ -50,6 +50,49 @@ public class QuickSort {
         return j;
     }
 
+    // 另一种做排序的实现，和上一种做法一样，只是不需要其他的临时变量和swap方法处理
+    private static int partition2(int[] arr, int startIndex, int endIndex) {
+        int pivot = arr[startIndex];
+
+        while (startIndex < endIndex) {
+            while (startIndex < endIndex && arr[endIndex] > pivot) {
+                endIndex--;
+            }
+            arr[startIndex] = arr[endIndex];
+            while (startIndex < endIndex && arr[startIndex] < pivot) {
+                startIndex++;
+            }
+            arr[endIndex] = arr[startIndex];
+        }
+
+        // 此时，startIndex == endIndex
+        arr[startIndex] = pivot;
+        return startIndex;
+    }
+
+    // 另一种排序的方法，这种思想更直观，就是利用一个变量storeIndex来保存pivot的最终位置。
+    // 初始storeIndex位置，选择一个数字作为pivot，并把pivot放到末尾（或开头），然后遍历除了pivot的元素
+    // 1. 如果这个元素比pivot小，则把当前元素和storeIndex交换，storeIndex移动，代表下一个可交换的位置
+    //    其中，如果storeIndex初始是开始位置，那么storeIndex++；如果在末尾，则是storeIndex--
+    // 2. 如果这个元素比pivot大或者相等，则不做任何事
+    // 最后再把storeIndex和pivot之前的位置交换一下
+    //
+    // 具体可以看 http://bubkoo.com/2014/01/12/sort-algorithm/quick-sort的实例分析。
+    private static int partition3(int[] arr, int startIndex, int endIndex) {
+        // 随便选择一个pivot数
+        int pivot = arr[endIndex];
+        int storeIndex = startIndex;
+        for (int i = startIndex + 1; i < endIndex; i++) {
+            if (arr[i] < pivot) {
+                swap(arr, storeIndex, i);
+                storeIndex++; // 交换位置之后，storeIndex加1，代表下一个可以替换的位置
+            }
+        }
+        swap(arr, endIndex, storeIndex); // 把pivot放到正确位置
+
+        return storeIndex;
+    }
+
     private static void sort(int[] arr, int startIndex, int endIndex) {
         if (startIndex >= endIndex) {
             return;
@@ -96,7 +139,7 @@ public class QuickSort {
     public static void main(String[] args) {
         int[] arr = {5, 8, 3, 2, 9, 4};
         quickSortRecursive(arr);
-        quickSort(arr);
+//        quickSort(arr);
         for (int i : arr) {
             System.out.print(i + " ");
         }
