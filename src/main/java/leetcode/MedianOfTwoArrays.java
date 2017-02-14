@@ -120,7 +120,7 @@ public class MedianOfTwoArrays {
                     result = a2;
                     j++;
                 }
-            } else if (a1 > a2) {
+            } else {
                 result = a2;
                 j++;
             }
