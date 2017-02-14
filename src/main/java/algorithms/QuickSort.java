@@ -1,5 +1,7 @@
 package algorithms;
 
+import java.util.Stack;
+
 /**
  * @author leo on 2/14/17.
  */
@@ -14,8 +16,8 @@ public class QuickSort {
      * 然后把左右两边按照相同的方法，继续选择各自的pivot排序，直到不能分裂成子数组为止。
      */
 
-    // 递归实现
-    private static void quickSort(int[] arr) {
+    /********************************************** 递归实现 *************************************************/
+    private static void quickSortRecursive(int[] arr) {
         if (arr.length <= 1) {
             return;
         }
@@ -57,6 +59,33 @@ public class QuickSort {
         sort(arr, pivotIndex + 1, endIndex);
     }
 
+    //********************************************** End *************************************************
+
+    //****************************************** 非递归实现 ************************************************
+    private static void quickSort(int[] arr) {
+        // 利用栈来保存每次分区的边界位置
+        Stack<Integer> pivot = new Stack<>();
+
+        pivot.push(0);
+        pivot.push(arr.length - 1);
+
+        while (!pivot.isEmpty()) {
+            int end = pivot.pop();
+            int start = pivot.pop();
+
+            int mid = partition(arr, start, end);
+
+            if (mid - 1 > start) {
+                pivot.push(start);
+                pivot.push(mid - 1);
+            }
+            if (mid + 1 < end) {
+                pivot.push(mid + 1);
+                pivot.push(end);
+            }
+        }
+    }
+
     private static void swap(int[] arr, int i, int j) {
         int temp = arr[i];
         arr[i] = arr[j];
@@ -66,6 +95,7 @@ public class QuickSort {
     //Test
     public static void main(String[] args) {
         int[] arr = {5, 8, 3, 2, 9, 4};
+        quickSortRecursive(arr);
         quickSort(arr);
         for (int i : arr) {
             System.out.print(i + " ");
