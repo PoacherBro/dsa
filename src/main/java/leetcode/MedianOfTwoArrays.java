@@ -102,6 +102,9 @@ public class MedianOfTwoArrays {
         if (k == 1) {
             return Math.min(nums1[0], nums2[0]);
         }
+        if ((m + n) == k) {
+            return Math.max(nums1[0], nums2[0]);
+        }
 
         int i = 0, j = 0;
         int a1 = nums1[0], a2;
@@ -172,6 +175,9 @@ public class MedianOfTwoArrays {
         if (k == 1) {
             return Math.min(nums1[0], nums2[0]);
         }
+        if ((m + n) == k) {
+            return Math.max(nums1[0], nums2[0]);
+        }
 
         int iMin = 0, iMax = m;
         while (iMin <= iMax) {
@@ -193,8 +199,8 @@ public class MedianOfTwoArrays {
 
     public static void main(String[] args) {
         PrintStream stdOut = System.out;
-        int[] nums1 = {1, 2, 5};
-        int[] nums2 = {3, 4, 6};
+        int[] nums1 = {5};
+        int[] nums2 = {3};
         stdOut.println(findMedianSortedArrays(nums1, nums2));
         stdOut.println(findMedianSortedArrays2(nums1, nums2));
         stdOut.println(findMedianSortedArrays3(nums1, nums2));
