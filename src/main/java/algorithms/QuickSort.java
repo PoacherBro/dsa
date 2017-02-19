@@ -39,7 +39,7 @@ public class QuickSort {
             }
             swap(arr, i, j);
         }
-        // i == j，因为pivot时在左边，这时候就看当前元素是不是小于或者等于pivot
+        // i == j，因为pivot是在左边，这时候就看当前元素是不是小于或者等于pivot
         // 如果是，则直接交换，当前index就是分界点
         // 如果不是，那么就不需要交换，但是分界点则是j的前一个
         if (arr[j] <= pivot) {
