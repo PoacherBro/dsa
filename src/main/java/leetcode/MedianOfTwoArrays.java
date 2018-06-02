@@ -135,12 +135,18 @@ public class MedianOfTwoArrays {
     /**
      * 解法3：二分法查找，找到第K个大小的值
      * 同上面的解法，这个问题主要的思路就是找到第K个大小的值，这里的K是中间位置。
+     * 对于两个数据长度为m和n的两个数组A和B，我们其实把两个数组分割成这样：
+     *            left_part       |      right_part
+     * A[0], A[1], ......, A[i-1] | A[i], A[i+1], ......, A[m-1]
+     * B[0], B[1], ......, B[j-1] | B[j], B[j+1], ......, B[n-1]
+     * 要满足中间值，则把左右两边作为一个数组，只要同时满足两个条件=>
+     * 1. len(left_part) = len(right_part)
+     * 2. max(left_part) <= min(right_part)
+     * 那么，可以说中间值是 median = (max(left_part) + min(right_part))/2
      *
-     * 其实可以不需要按照上面顺序查找，根据二分法思想，可以用两个index，p和q指向两个数组。
-     * 如果p + q = k，那么就找到了第k个大小的值。
-     * 同时，退出循环的条件就是 nums1[p - 1] <= nums2[q] && nums1[p] >= nums2[q - 1]
-     *
-     * 利用二分法查找思想，我们确定p的搜索界限是[0, nums1.length]。同时由于q=k-p，那么q也动态的移动。
+     * 其实可以不需要按照上面顺序查找，根据二分法思想，可以用两个index，i和j指向两个数组。
+     * 如果i + j = k，那么就找到了第k个大小的值。
+     * 同时，退出循环的条件就是 nums1[i - 1] <= nums2[j] && nums1[i] >= nums2[j - 1]
      *
      * https://discuss.leetcode.com/topic/4996/share-my-o-log-min-m-n-solution-with-explanation
      *
@@ -150,24 +156,78 @@ public class MedianOfTwoArrays {
      * @param nums2 有序数组
      * @return 中间值
      */
-    private static double findMedianSortedArrays3(int[] nums1, int[] nums2) {
+    private static double findMedianSortedArrays3(int[] nums1, int nums2[]) {
         int m = nums1.length;
         int n = nums2.length;
 
-        int k = (m + n + 1) / 2;
-
-        if ((m + n) % 2 == 1) {
-            return getKthNum2(nums1, m, nums2, n, k);
-        } else {
-            return (getKthNum2(nums1, m, nums2, n, k) + getKthNum2(nums1, m, nums2, n, k + 1)) / 2.0f;
+        // 保证m<=n
+        if (m > n) {
+            return findMedianSortedArrays3(nums2, nums1);
         }
+
+        int i = 0, j = 0, iMin = 0, iMax = m, k = (m + n + 1) / 2;
+        double maxLeft = 0.0, minRight = 0.0;
+        while (iMin <= iMax) {
+            i = (iMin + iMax) / 2;
+            j = k - i;
+
+            // 根据m<=n && i<m && j=k-i，可以推断一定 j > 0
+            if (i < m && nums2[j - 1] > nums1[i]) {
+                // i 对应的值小了
+                iMin = i + 1;
+            } else if (i > 0 && nums1[i - 1] > nums2[j]) { // 同理，i>0则一定j<n
+                // i 对应的值大了
+                iMax = i - 1;
+            } else {
+                // i 值刚好
+                if (i == 0) maxLeft = (double)nums2[k - 1];
+                else if (j == 0) maxLeft = (double)nums1[k - 1];
+                else maxLeft = (double)Math.max(nums1[i - 1], nums2[j - 1]);
+
+                break;
+            }
+        }
+
+        // 如果是基数，那么maxLeft就是平均值
+        if ((m + n) % 2 == 1) {
+            return maxLeft;
+        }
+
+        if (i == m) {
+            minRight = (double)nums2[j];
+        } else if (j == n) {
+            minRight = (double)nums1[i];
+        } else {
+            minRight = (double)Math.min(nums1[i], nums2[j]);
+        }
+        return (maxLeft + minRight) / 2.0f;
+
     }
 
-    private static int getKthNum2(int[] nums1, int m, int[] nums2, int n, int k) {
+
+    /**
+     * 解法4，和解法3的思想是一样的，不过这个时候我们假设就是要找出第K个大小的值，它不知中间值，该如何做？
+     *
+     * 参考：https://www.geeksforgeeks.org/k-th-element-two-sorted-arrays/
+     * @param nums1 从小到大排列整数数组
+     * @param nums2 从小到大排列整数数组
+     * @param k 第几个大的数，从1开始算起
+     * @return
+     */
+    private static int findKthNum(int[] nums1, int[] nums2, int k) {
+        int m = nums1.length;
+        int n = nums2.length;
+
+        // 处理异常数据
+        if (m == 0 && n == 0) {
+            throw new IllegalArgumentException("Two arrays cannot both be empty");
+        }
+
         // 保证 m <= n
         if (m > n) {
-            return getKthNum2(nums2, n, nums1, m, k);
+            return findKthNum(nums2, nums1, k);
         }
+
         // 处理特殊情况
         if (m == 0) {
             return nums2[k - 1];
@@ -176,33 +236,20 @@ public class MedianOfTwoArrays {
             return Math.min(nums1[0], nums2[0]);
         }
         if ((m + n) == k) {
-            return Math.max(nums1[0], nums2[0]);
+            return Math.max(nums1[m - 1], nums2[n - 1]);
         }
 
-        int iMin = 0, iMax = m;
-        while (iMin <= iMax) {
-            int i = (iMax + iMin) / 2; // 二分法查找
-            int j = k - i;
-
-            if (i < m && j > 0 && nums1[i] < nums2[j - 1]) {
-                iMin = i + 1;
-            } else if (i > 0 && j < n && nums1[i - 1] > nums2[j]) {
-                iMax = i - 1;
-            } else {
-                if (i == 0) return nums2[j - 1];
-                else if (j == 0) return nums1[i - 1];
-                else return Math.max(nums1[i - 1], nums2[j - 1]);
-            }
-        }
+        // TODO 实现算法
         return -1;
     }
 
     public static void main(String[] args) {
         PrintStream stdOut = System.out;
-        int[] nums1 = {5};
-        int[] nums2 = {3};
+        int[] nums1 = {1, 6, 7, 8};
+        int[] nums2 = {2, 3, 4, 5};
         stdOut.println(findMedianSortedArrays(nums1, nums2));
         stdOut.println(findMedianSortedArrays2(nums1, nums2));
         stdOut.println(findMedianSortedArrays3(nums1, nums2));
+        stdOut.println(findKthNum(nums1, nums2, 5));
     }
 }
