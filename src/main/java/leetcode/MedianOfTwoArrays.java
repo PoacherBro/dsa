@@ -277,13 +277,62 @@ public class MedianOfTwoArrays {
 	    }
     }
 
+    /**
+     * 还是查找第K个大小数字问题，对应解法3，复杂度为O(log(K))，即O(log(m+n))，利用K值来二分查找。
+     * 当m,n>2时，效率要比解法2好 => log(m)+log(n) = log(mn) > log(m+n), m,n>2
+     *
+     * 思路：（和求median问题的解法3类似）
+     *
+     * 参考：https://www.geeksforgeeks.org/k-th-element-two-sorted-arrays/
+     * @param nums1 从小到大排列整数数组
+     * @param nums2 从小到大排列整数数组
+     * @param k 第几个大的数，从1开始算起
+     * @return 对应K的那个数
+     */
+    private static int findKthNum2(int[] nums1, int[] nums2, int k) {
+        int m = nums1.length;
+        int n = nums2.length;
+
+        // 处理异常数据
+        if (m == 0 && n == 0) {
+            throw new IllegalArgumentException("Two arrays cannot both be empty");
+        }
+        if (k > (m + n)) {
+            throw new IllegalArgumentException("The K exceeded the sum of two arrays' length");
+        }
+
+        // 确保m<=n
+        if (m > n) {
+            return findKthNum2(nums2, nums1, k);
+        }
+
+        if (m == 0) {
+            return nums2[k - 1];
+        }
+        if (k == 1) {
+            return Math.min(nums1[0], nums2[0]);
+        }
+
+        int i = Math.min(m, k / 2), j = Math.min(n, k / 2);
+
+        //递归方式
+        if (nums1[i - 1] > nums2[j - 1]) {
+            // 此时只需要找第 k-j 个元素就行，因为已经排除比较小的 j 个元素了
+            return findKthNum2(nums1, Arrays.copyOfRange(nums2, j, n), k - j);
+        } else {
+            // 同理
+            return findKthNum2(Arrays.copyOfRange(nums1, i, m), nums2, k - i);
+        }
+    }
+
     public static void main(String[] args) {
         PrintStream stdOut = System.out;
-        int[] nums1 = {1, 6, 7, 8};
-        int[] nums2 = {2, 3, 4, 5};
+        int[] nums1 = {1};
+        int[] nums2 = {2};
         stdOut.println(findMedianSortedArrays(nums1, nums2));
         stdOut.println(findMedianSortedArrays2(nums1, nums2));
         stdOut.println(findMedianSortedArrays3(nums1, nums2));
-        stdOut.println(findKthNum(nums1, nums2, 8));
+        stdOut.println(findKthNum(nums1, nums2, 2));
+        stdOut.println(findKthNum2(nums1, nums2, 2));
     }
 }
