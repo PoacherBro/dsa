@@ -231,7 +231,7 @@ public class MedianOfTwoArrays {
      *    2.1 如果nums1[mid1-1]>nums2[mid2-1]，说明这个值可能在nums1里，且范围是[0 - (mid1-1)]；
      *    2.2 否则，则可能在nums2里，且范围是[0 - (mid2-1)]。
      *    注意这时不需要修改K值。
-     * 3. 当一直切分到两个数组其中一个长度为0时，则另外一个数组的第一个值为对应要查找的值。
+     * 3. 当一直切分到两个数组其中一个长度为0时，则另外一个数组的第K（修正过的）个值为对应要查找的值。
      *
      * 参考：https://www.geeksforgeeks.org/k-th-element-two-sorted-arrays/
      * @param nums1 从小到大排列整数数组
@@ -248,7 +248,7 @@ public class MedianOfTwoArrays {
             throw new IllegalArgumentException("Two arrays cannot both be empty");
         }
         if (k > (m + n)) {
-            throw new IllegalArgumentException("The kth num exceeded the sum fo two arrays' length");
+            throw new IllegalArgumentException("The K exceeded the sum of two arrays' length");
         }
 
         if (m == 0) {
@@ -258,30 +258,32 @@ public class MedianOfTwoArrays {
             return nums1[k - 1];
         }
 
-        int mid1 = (m + 1) / 2;
-        int mid2 = (n + 1) / 2;
-        if (mid1 + mid2 < k) {
-            if (nums1[mid1 - 1] > nums2[mid2 - 1]) {
-                return findKthNum(nums1, Arrays.copyOfRange(nums2, mid2, n), k - mid2);
+        // 此处不能用(m+1)/2，因为如果m>0，则此表达式值一直不能为0，也就不能退出递归
+        // 所以，对应K，应该是K-1，从0开始索引
+        int mid1 = m / 2;
+        int mid2 = n / 2;
+        if (mid1 + mid2 < k - 1) {
+            if (nums1[mid1] > nums2[mid2]) {
+                return findKthNum(nums1, Arrays.copyOfRange(nums2, mid2 + 1, n), k - mid2 - 1);
             } else {
-		        return findKthNum(Arrays.copyOfRange(nums1, mid1, m), nums2, k - mid1);
+		        return findKthNum(Arrays.copyOfRange(nums1, mid1 + 1, m), nums2, k - mid1 - 1);
 	        }
         } else {
-	        if (nums1[mid1 - 1] > nums2[mid2 - 1]) {
-		        return findKthNum(Arrays.copyOfRange(nums1, 0, mid1 - 1), nums2, k);
+	        if (nums1[mid1] > nums2[mid2]) {
+		        return findKthNum(Arrays.copyOfRange(nums1, 0, mid1), nums2, k);
 	        } else {
-	            return findKthNum(nums1, Arrays.copyOfRange(nums2, 0, mid2 - 1), k);
+	            return findKthNum(nums1, Arrays.copyOfRange(nums2, 0, mid2), k);
             }
 	    }
     }
 
     public static void main(String[] args) {
         PrintStream stdOut = System.out;
-        int[] nums1 = {1, 6, 7, 8, 9};
+        int[] nums1 = {1, 6, 7, 8};
         int[] nums2 = {2, 3, 4, 5};
         stdOut.println(findMedianSortedArrays(nums1, nums2));
         stdOut.println(findMedianSortedArrays2(nums1, nums2));
         stdOut.println(findMedianSortedArrays3(nums1, nums2));
-        stdOut.println(findKthNum(nums1, nums2, 5));
+        stdOut.println(findKthNum(nums1, nums2, 8));
     }
 }
