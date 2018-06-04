@@ -66,8 +66,7 @@ public class LongestSubstring {
     public static void main(String[] args) {
         PrintStream stdOut = System.out;
         String s = "abcabcbb";
-        stdOut.print(lengthOfLongestSubstring(s));
-        stdOut.println();
-        stdOut.print(lengthOfLongestSubstring2(s));
+        stdOut.println(lengthOfLongestSubstring(s));
+        stdOut.println(lengthOfLongestSubstring2(s));
     }
 }
