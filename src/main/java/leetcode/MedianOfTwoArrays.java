@@ -1,6 +1,7 @@
 package leetcode;
 
 import java.io.PrintStream;
+import java.util.Arrays;
 
 /**
  * @author Leo on 2017/2/4
@@ -69,7 +70,7 @@ public class MedianOfTwoArrays {
 
     /**
      * 解法2：还是用顺序查找，但是我们不需要使用O(n)的空间。
-     * 利用merge sort类似的原理，我们记录第K个大小的数，这样搜索到k时，直接返回。
+     * 利用merge sort类似的原理（合并分割的数组），我们记录第K个大小的数，这样搜索到k时，直接返回。
      * 时间复杂度时O(k)，空间复杂度时O(1)
      *
      * @param nums1 有序数组
@@ -90,6 +91,10 @@ public class MedianOfTwoArrays {
     }
 
     private static int getKthNum(int[] nums1, int m, int[] nums2, int n, int k) {
+        if (m == 0 && n == 0) {
+            throw new IllegalArgumentException("Two arrays both are empty");
+        }
+
         // 确保 m <= n
         if (m > n) {
             return getKthNum(nums2, n, nums1, m, k);
@@ -100,10 +105,10 @@ public class MedianOfTwoArrays {
             return nums2[k - 1];
         }
         if (k == 1) {
-            return Math.min(nums1[0], nums2[0]);
+            return m > 0 ? Math.min(nums1[0], nums2[0]) : nums2[0];
         }
         if ((m + n) == k) {
-            return Math.max(nums1[0], nums2[0]);
+            return m > 0 ? Math.max(nums1[m - 1], nums2[n - 1]) : nums2[n - 1];
         }
 
         int i = 0, j = 0;
@@ -160,13 +165,16 @@ public class MedianOfTwoArrays {
         int m = nums1.length;
         int n = nums2.length;
 
+        if (m == 0 && n == 0)
+            throw new IllegalArgumentException("Two arrays both are empty");
+
         // 保证m<=n
         if (m > n) {
             return findMedianSortedArrays3(nums2, nums1);
         }
 
         int i = 0, j = 0, iMin = 0, iMax = m, k = (m + n + 1) / 2;
-        double maxLeft = 0.0, minRight = 0.0;
+        double maxLeft = 0.0, minRight;
         while (iMin <= iMax) {
             i = (iMin + iMax) / 2;
             j = k - i;
@@ -206,13 +214,30 @@ public class MedianOfTwoArrays {
 
 
     /**
-     * 解法4，和解法3的思想是一样的，不过这个时候我们假设就是要找出第K个大小的值，它不知中间值，该如何做？
+     * 引申问题，对于两个已排序的数组，如何找到第K个大小的数？（从小到大）
+     * 和解法3的思想是一样的，不过这个时候我们假设就是要找出第K个大小的值，它不是中间值，该如何做？
+     *
+     * 解法1： 和之前解法2一样，用两个指针指向两个数组，此时算法复杂度是O(k)；
+     * 解法2： 思想和之前解法3差不多，采用分治法，从两个数组各自的中间开始查找，此时算法复杂度是O(log(m) + log(n))；
+     * 解法3： 在解法2类似，不过不是从两个数组的中间开始，而是从 K/2 开始，此时算法复杂度为O(log(k)) = O(log(m+n))。
+     *
+     * 以下对应为解法2，用递归实现。
+     * 从每个数组的中间开始找起,
+     * 1. 如果mid1+mid2 < K，则说明还需要往后面找，这时：
+     *    1.1 如果nums1[mid1-1]>nums2[mid2-1]，说明nums2在mid2之前数据都不满足要求，可以舍弃，
+     *        从mid2后面开始找，同时更正k的值为k-mid2;
+     *    1.2 否则，则是从nums1的mid1后面开始找，更正k=k-mid1。
+     * 2. 如果mid1+mid2 >= k，则说明中间值之前的数据能满足要求，这时：
+     *    2.1 如果nums1[mid1-1]>nums2[mid2-1]，说明这个值可能在nums1里，且范围是[0 - (mid1-1)]；
+     *    2.2 否则，则可能在nums2里，且范围是[0 - (mid2-1)]。
+     *    注意这时不需要修改K值。
+     * 3. 当一直切分到两个数组其中一个长度为0时，则另外一个数组的第一个值为对应要查找的值。
      *
      * 参考：https://www.geeksforgeeks.org/k-th-element-two-sorted-arrays/
      * @param nums1 从小到大排列整数数组
      * @param nums2 从小到大排列整数数组
      * @param k 第几个大的数，从1开始算起
-     * @return
+     * @return 对应K的那个数
      */
     private static int findKthNum(int[] nums1, int[] nums2, int k) {
         int m = nums1.length;
@@ -222,30 +247,37 @@ public class MedianOfTwoArrays {
         if (m == 0 && n == 0) {
             throw new IllegalArgumentException("Two arrays cannot both be empty");
         }
-
-        // 保证 m <= n
-        if (m > n) {
-            return findKthNum(nums2, nums1, k);
+        if (k > (m + n)) {
+            throw new IllegalArgumentException("The kth num exceeded the sum fo two arrays' length");
         }
 
-        // 处理特殊情况
         if (m == 0) {
             return nums2[k - 1];
         }
-        if (k == 1) {
-            return Math.min(nums1[0], nums2[0]);
-        }
-        if ((m + n) == k) {
-            return Math.max(nums1[m - 1], nums2[n - 1]);
+        if (n == 0) {
+            return nums1[k - 1];
         }
 
-        // TODO 实现算法
-        return -1;
+        int mid1 = (m + 1) / 2;
+        int mid2 = (n + 1) / 2;
+        if (mid1 + mid2 < k) {
+            if (nums1[mid1 - 1] > nums2[mid2 - 1]) {
+                return findKthNum(nums1, Arrays.copyOfRange(nums2, mid2, n), k - mid2);
+            } else {
+		        return findKthNum(Arrays.copyOfRange(nums1, mid1, m), nums2, k - mid1);
+	        }
+        } else {
+	        if (nums1[mid1 - 1] > nums2[mid2 - 1]) {
+		        return findKthNum(Arrays.copyOfRange(nums1, 0, mid1 - 1), nums2, k);
+	        } else {
+	            return findKthNum(nums1, Arrays.copyOfRange(nums2, 0, mid2 - 1), k);
+            }
+	    }
     }
 
     public static void main(String[] args) {
         PrintStream stdOut = System.out;
-        int[] nums1 = {1, 6, 7, 8};
+        int[] nums1 = {1, 6, 7, 8, 9};
         int[] nums2 = {2, 3, 4, 5};
         stdOut.println(findMedianSortedArrays(nums1, nums2));
         stdOut.println(findMedianSortedArrays2(nums1, nums2));
