@@ -24,20 +24,20 @@ public class MergeSort {
         }
         int length = high - low, mid = (length >> 1) + low;
 
-        int start1 = low, end1 = mid;
-        int start2 = mid + 1, end2 = high;
+        int start1 = low;
+        int start2 = mid + 1;
 
-        mergeSortRecursive(arr, result, start1, end1);
-        mergeSortRecursive(arr, result, start2, end2);
+        mergeSortRecursive(arr, result, start1, mid);
+        mergeSortRecursive(arr, result, start2, high);
 
         int k = low;
-        while (start1 <= end1 && start2 <= end2) {
+        while (start1 <= mid && start2 <= high) {
             result[k++] = arr[start1] < arr[start2] ? arr[start1++] : arr[start2++];
         }
-        while (start1 <= end1) {
+        while (start1 <= mid) {
             result[k++] = arr[start1++];
         }
-        while (start2 <= end2) {
+        while (start2 <= high) {
             result[k++] = arr[start2++];
         }
         for (k = low; k <= high; k++) {
@@ -68,16 +68,16 @@ public class MergeSort {
                 int high = (start + 2 * block) < length ? (start + 2 * block) : length;
 
                 // 两个块的起始位置以及结束位置
-                int start1 = low, end1 = mid;
-                int start2 = mid, end2 = high;
+                int start1 = low;
+                int start2 = mid;
 
-                while (start1 < end1 && start2 < end2) {
+                while (start1 < mid && start2 < high) {
                     result[low++] = arr[start1] < arr[start2] ? arr[start1++] : arr[start2++];
                 }
-                while (start1 < end1) {
+                while (start1 < mid) {
                     result[low++] = arr[start1++];
                 }
-                while (start2 < end2) {
+                while (start2 < high) {
                     result[low++] = arr[start2++];
                 }
             }
@@ -90,9 +90,9 @@ public class MergeSort {
 
 
     public static void main(String[] args) {
-        int[] arr = {5, 8, 3, 4, 9, 7};
+        int[] arr = {5, 8, 3, 4, 4, 9, 7};
         int[] result = new int[arr.length];
-//        mergeSortRecursive(arr, result, 0, arr.length - 1);
+        mergeSortRecursive(arr, result, 0, arr.length - 1);
         mergeSort(arr);
         for (int i : arr) {
             System.out.print(i + " ");
