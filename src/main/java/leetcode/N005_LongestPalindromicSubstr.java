@@ -39,8 +39,7 @@ public class N005_LongestPalindromicSubstr {
         // 存储最长回文子串
         String substr = "";
 
-        // 可以直接从第二个字符开始
-        for (int i = 1; i < len - 1; i++) {
+        for (int i = 0; i < len - 1; i++) {
             int m = i - 1, n = i + 1, tmpLenght;
             // 考虑回文长度为奇数情况，此时 i 为轴
             while (m >= 0 && n < len) {
@@ -81,7 +80,7 @@ public class N005_LongestPalindromicSubstr {
 
     // 测试用例
     public static void main(String[] args) {
-        System.out.println(longestPalindrome("ababac"));
+        System.out.println(longestPalindrome("bb"));
         System.out.println(longestPalindrome("bbbbb"));
         System.out.println(longestPalindrome("babddb"));
     }
