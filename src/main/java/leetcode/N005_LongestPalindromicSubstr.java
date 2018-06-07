@@ -16,6 +16,11 @@ package leetcode;
  *
  */
 public class N005_LongestPalindromicSubstr {
+    // 存储最长回文子串的index
+    private int low;
+    // 最长回文子串的长度
+    private int maxLen;
+
     /**
      * 解法1：
      * 回文的特点是从中间往两边看，字符串是一样的，那么可以从第一个字符开始往尾部循环：
@@ -28,7 +33,7 @@ public class N005_LongestPalindromicSubstr {
      * @param s 输入字符串
      * @return 返回最长回文子串
      */
-    private static String longestPalindrome(String s) {
+    private String longestPalindrome(String s) {
         assert s != null;
 
         int len = s.length();
@@ -36,52 +41,40 @@ public class N005_LongestPalindromicSubstr {
             return s;
         }
 
-        // 存储最长回文子串
-        String substr = "";
-
+        // 重构后，不能从第二个开始，需要从第一个开始查找
         for (int i = 0; i < len - 1; i++) {
-            int m = i - 1, n = i + 1, tmpLenght;
-            // 考虑回文长度为奇数情况，此时 i 为轴
-            while (m >= 0 && n < len) {
-                if (s.charAt(m) == s.charAt(n)) {
-                    m --;
-                    n ++;
-                } else {
-                    break;
-                }
-            }
-
-            // 计算回文长度
-            tmpLenght = n - m - 1;
-            if (substr.length() < tmpLenght) {
-                substr = s.substring(m + 1, n);
-            }
-
-            // 回文字符串为偶数情况
-            m = i;
-            n = i + 1;
-            while (m >= 0 && n < len) {
-                if (s.charAt(m) == s.charAt(n)) {
-                    m --;
-                    n ++;
-                } else {
-                    break;
-                }
-            }
-
-            tmpLenght = n - m - 1;
-            if (substr.length() < tmpLenght) {
-                substr = s.substring(m + 1, n);
-            }
+            expandPalindromic(s, i, i); // 回文子串长度为奇数
+            expandPalindromic(s, i, i + 1);  // 回文子串长度为偶数
         }
 
-        return substr;
+        return s.substring(low, low + maxLen);
+    }
+
+    /**
+     * 抽象一个方法来查找回文左右两边的最长子串
+     * @param s 原输入字符串
+     * @param m 回文左边开始查找的index
+     * @param n 回文右边开始查找的index
+     */
+    private void expandPalindromic(String s, int m, int n) {
+        while (m >= 0 && n < s.length() && s.charAt(m) == s.charAt(n)) {
+            m --;
+            n ++;
+        }
+
+        int tmpLenght = n - m - 1;
+        if (maxLen < tmpLenght) {
+            low = m + 1;
+            maxLen = tmpLenght;
+        }
     }
 
     // 测试用例
     public static void main(String[] args) {
-        System.out.println(longestPalindrome("bb"));
-        System.out.println(longestPalindrome("bbbbb"));
-        System.out.println(longestPalindrome("babddb"));
+        N005_LongestPalindromicSubstr longestPalindromic = new N005_LongestPalindromicSubstr();
+        System.out.println(longestPalindromic.longestPalindrome("bb"));
+        System.out.println(longestPalindromic.longestPalindrome("ababac"));
+        System.out.println(longestPalindromic.longestPalindrome("bbbbb"));
+        System.out.println(longestPalindromic.longestPalindrome("babddb"));
     }
 }
