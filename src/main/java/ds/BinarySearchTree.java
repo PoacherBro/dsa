@@ -7,7 +7,14 @@ public class BinarySearchTree<T extends Comparable> {
         Node right;
     }
 
-    public void <T> add(T value) {
+    public <T> void add(T value) {
     }
     
 }
+
+
+
+
+
+
+
