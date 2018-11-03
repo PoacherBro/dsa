@@ -45,3 +45,9 @@ buildNumber.properties
 
 # cpp
 *.out
+
+# VS Code
+.settings
+.classpath
+.project
+.vscode
