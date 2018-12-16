@@ -62,10 +62,10 @@ public class N005_LongestPalindromicSubstr {
             n ++;
         }
 
-        int tmpLenght = n - m - 1;
-        if (maxLen < tmpLenght) {
+        int tmpLength = n - m - 1;
+        if (maxLen < tmpLength) {
             low = m + 1;
-            maxLen = tmpLenght;
+            maxLen = tmpLength;
         }
     }
 
