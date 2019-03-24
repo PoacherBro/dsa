@@ -23,10 +23,10 @@ function IndexToColumnName(index) {
     do {
         t = position % charCount;
         if (t == 0) {
-            t = 26;
+            t = charCount;
         }
         result.push(basicChar[t - 1]);
-        position = (position - t) / 26;
+        position = (position - t) / charCount;
     } while(position > 0)
 
     let str = "";
