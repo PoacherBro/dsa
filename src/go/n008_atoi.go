@@ -58,6 +58,7 @@ func main() {
 	print("4193 with words")
 	print("words and 987")
 	print("-91283472332")
+	print("2323你好")
 }
 
 func print(data string) {
