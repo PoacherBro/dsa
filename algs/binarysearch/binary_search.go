@@ -1,4 +1,4 @@
-package binary_search
+package binarysearch
 
 // Search will return index of matched `key` in `src` array
 func Search(key int, src []int) int {
