@@ -1,6 +1,6 @@
 package binarysearch
 
-// Search will return index of matched `key` in `src` array
+// Search will return index of matched `key` in sorted `src` array
 func Search(key int, src []int) int {
 	low, high := 0, len(src)-1
 	for low <= high {
