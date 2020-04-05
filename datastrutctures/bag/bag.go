@@ -52,7 +52,7 @@ func (b *arrBag) Iterator() []interface{} {
 
 // =================== implement Link start ===============================
 type linkBag struct {
-	locker sync.RUnlock
+	locker sync.RWMutex
 	first  *node
 	size   int
 }
