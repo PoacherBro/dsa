@@ -315,6 +315,9 @@ BenchmarkIterateBag_Objective_Array-8            278       4335142 ns/op        
 BenchmarkIterateBag_Objective_Link-8             240       4364060 ns/op           8 B/op           1 allocs/op
 ```
 
+从性能上看，使用 callback 方式更优，且没有额外的内存分配，并且 interface 设计更为简单直观。  
+对于使用 chan 性能更差，感觉虽然只有两个 goroutine 存在，但是对于 chan 的分配以及 goroutine 调度，还是有一点影响性能的。  
+
 
 ## 参考  
 
