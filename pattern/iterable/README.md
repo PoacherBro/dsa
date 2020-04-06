@@ -108,28 +108,28 @@ b.Iterator(func(i interface{}) error {
 // For Array underlying implementation
 func (b *arrBag) Iterator() (func() (interface{}, bool), bool) {
     index := 0
-	var item interface{}
-	return func() (interface{}, bool) {
-		if index < a.size {
-			item = a.data[index]
-			index++
-		} else {
-			item = nil
-		}
-		return item, index < a.size
-	}, index < a.size
+    var item interface{}
+    return func() (interface{}, bool) {
+        if index < a.size {
+            item = a.data[index]
+            index++
+        } else {
+            item = nil
+        }
+        return item, index < a.size
+    }, index < a.size
 }
 
 // For Link underlying implementation
 func (b *linkBag) Iterator() (func() (interface{}, bool), bool) {
     item := b.node
-	return func() (interface{}, bool) {
-		current := item
-		if current != nil {
-			item = current.next
-		}
-		return current, item != nil
-	}, item != nil && item.next != nil
+    return func() (interface{}, bool) {
+        current := item
+        if current != nil {
+            item = current.next
+        }
+        return current, item != nil
+    }, item != nil && item.next != nil
 }
 ```
 
@@ -151,7 +151,7 @@ for hasNext {
 
 ```go
 type ChanIterable interface {
-	Chan(context.Context) chan interface{}
+    Chan(context.Context) chan interface{}
 }
 ```
 
@@ -162,38 +162,38 @@ type ChanIterable interface {
 ```go
 // For Array underlying implementation
 func (b *arrBag) Chan(ctx context.Context) <-chan interface{} {
-	buf := make(chan interface{})
-	go func() {
-		defer close(buf)
-		for _, item := range b.data {
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				buf <- item
-			}
-		}
-	}()
-	return buf
+    buf := make(chan interface{})
+    go func() {
+        defer close(buf)
+        for _, item := range b.data {
+            select {
+            case <-ctx.Done():
+                return
+            default:
+                buf <- item
+            }
+        }
+    }()
+    return buf
 }
 
 // For Link underlying implementation
 func (b *linkBag) Chan(ctx context.Context) <-chan interface{} {
-	buf := make(chan interface{})
-	node := b.node
-	go func() {
-		defer close(buf)
-		for node != nil {
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				buf <- node.data
-				node = node.next
-			}
-		}
-	}()
-	return buf
+    buf := make(chan interface{})
+    node := b.node
+    go func() {
+        defer close(buf)
+        for node != nil {
+            select {
+            case <-ctx.Done():
+                return
+            default:
+                buf <- node.data
+                node = node.next
+            }
+        }
+    }()
+    return buf
 }
 ```
 
@@ -219,8 +219,8 @@ for item := range ab.Chan(ctx) {
 
 ```go
 type IteratorObj interface {
-	HasNext() bool
-	Next() interface{}
+    HasNext() bool
+    Next() interface{}
 }
 ```
 
@@ -229,7 +229,7 @@ type IteratorObj interface {
 
 ```go
 type Iterable interface {
-	GenIterator() IteratorObj
+    GenIterator() IteratorObj
 }
 ```
 
@@ -238,51 +238,51 @@ type Iterable interface {
 ```go
 // 底层采用数组存储数据
 type objArrayIterator struct {
-	index int
-	data  []interface{}
+    index int
+    data  []interface{}
 }
 
 func (b *arrBag) GenIterator() iterable.IteratorObj {
-	return &objArrayIterator{
-		index: 0,
-		data:  b.data,
-	}
+    return &objArrayIterator{
+        index: 0,
+        data:  b.data,
+    }
 }
 
 func (it *objArrayIterator) HasNext() bool {
-	return it.index < len(it.data)
+    return it.index < len(it.data)
 }
 
 func (it *objArrayIterator) Next() interface{} {
-	var result interface{}
-	if it.index < len(it.data) {
-		result = it.data[it.index]
-		it.index++
-	}
-	return result
+    var result interface{}
+    if it.index < len(it.data) {
+        result = it.data[it.index]
+        it.index++
+    }
+    return result
 }
 
 // 底层采用链表存储数据
 type objLinkIterator struct {
-	iNode *node
+    iNode *node
 }
 
 func (b *linkBag) GenIterator() iterable.IteratorObj {
-	return &objLinkIterator{
-		iNode: b.first,
-	}
+    return &objLinkIterator{
+        iNode: b.first,
+    }
 }
 
 func (it *objLinkIterator) HasNext() bool {
-	return it.iNode != nil
+    return it.iNode != nil
 }
 
 func (it *objLinkIterator) Next() interface{} {
-	result := it.iNode
-	if it.iNode != nil {
-		it.iNode = it.iNode.next
-	}
-	return result
+    result := it.iNode
+    if it.iNode != nil {
+        it.iNode = it.iNode.next
+    }
+    return result
 }
 ```
 
@@ -305,14 +305,14 @@ for it.HasNext() {
 
 ```shell
 #  go test -benchmem -bench ^Benchmark -run ^$
-BenchmarkIterateBag_Callback_Array-8    	     429	   2500652 ns/op	       0 B/op	       0 allocs/op
-BenchmarkIterateBag_Callback_Link-8     	     375	   3479282 ns/op	       0 B/op	       0 allocs/op
-BenchmarkIterateBag_Channel_Array-8     	       6	 220628550 ns/op	     176 B/op	       1 allocs/op
-BenchmarkIterateBag_Channel_Link-8      	       5	 207023700 ns/op	     200 B/op	       2 allocs/op
-BenchmarkIterateBag_Closure_Array-8     	     243	   4789662 ns/op	      56 B/op	       3 allocs/op
-BenchmarkIterateBag_Closure_Link-8      	     351	   3945431 ns/op	      24 B/op	       2 allocs/op
-BenchmarkIterateBag_Objective_Array-8   	     278	   4335142 ns/op	      32 B/op	       1 allocs/op
-BenchmarkIterateBag_Objective_Link-8    	     240	   4364060 ns/op	       8 B/op	       1 allocs/op
+BenchmarkIterateBag_Callback_Array-8             429       2500652 ns/op           0 B/op           0 allocs/op
+BenchmarkIterateBag_Callback_Link-8              375       3479282 ns/op           0 B/op           0 allocs/op
+BenchmarkIterateBag_Channel_Array-8                6     220628550 ns/op         176 B/op           1 allocs/op
+BenchmarkIterateBag_Channel_Link-8                 5     207023700 ns/op         200 B/op           2 allocs/op
+BenchmarkIterateBag_Closure_Array-8              243       4789662 ns/op          56 B/op           3 allocs/op
+BenchmarkIterateBag_Closure_Link-8               351       3945431 ns/op          24 B/op           2 allocs/op
+BenchmarkIterateBag_Objective_Array-8            278       4335142 ns/op          32 B/op           1 allocs/op
+BenchmarkIterateBag_Objective_Link-8             240       4364060 ns/op           8 B/op           1 allocs/op
 ```
 
 
