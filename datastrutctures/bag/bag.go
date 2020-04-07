@@ -24,10 +24,7 @@ type arrBag struct {
 
 // NewArrayBag create a `Bag` which is implemented by array underline
 func NewArrayBag() Bag {
-	return &arrBag{
-		data: make([]interface{}, 0),
-		size: 0,
-	}
+	return &arrBag{}
 }
 
 func (b *arrBag) Add(item interface{}) {
