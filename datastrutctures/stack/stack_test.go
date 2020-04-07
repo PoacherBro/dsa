@@ -1,24 +1,24 @@
-package queue_test
+package stack_test
 
 import (
 	"testing"
 
-	"github.com/PoacherBro/dsa/datastrutctures/queue"
+	"github.com/PoacherBro/dsa/datastrutctures/stack"
 )
 
-// go test -v -timeout 3s -run ^TestArrayQueue$
-func TestArrayQueue(t *testing.T) {
-	q := queue.NewArrayQueue()
-	testQueue(q, t)
+// go test -v -timeout 3s -run ^TestArrayStack$
+func TestArrayStack(t *testing.T) {
+	q := stack.NewArrayStack()
+	testStack(q, t)
 }
 
-// go test -v -timeout 3s -run ^TestLinkQueue$
-func TestLinkQueue(t *testing.T) {
-	q := queue.NewLinkQueue()
-	testQueue(q, t)
+// go test -v -timeout 3s -run ^TestLinkStack$
+func TestLinkStack(t *testing.T) {
+	q := stack.NewLinkStack()
+	testStack(q, t)
 }
 
-func testQueue(q queue.Queue, t *testing.T) {
+func testStack(q stack.Stack, t *testing.T) {
 	l := 10
 
 	for i := 0; i < l; i++ {
@@ -48,7 +48,7 @@ func testQueue(q queue.Queue, t *testing.T) {
 			t.Fatalf("queue pop item get(%d) != expected(%d)", it, i-1)
 		}
 	}
-	if _, err := q.Pop(); err != queue.ErrEmpty {
+	if _, err := q.Pop(); err != stack.ErrEmpty {
 		t.Fatal("queue pop empty queue without err")
 	}
 }

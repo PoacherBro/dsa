@@ -1,4 +1,4 @@
-package queue
+package stack
 
 import (
 	"errors"
@@ -6,33 +6,33 @@ import (
 )
 
 // ErrEmpty when pop for a empty queue
-var ErrEmpty = errors.New("empty queue")
+var ErrEmpty = errors.New("empty stack")
 
-// Queue is FIFO structure
-type Queue interface {
+// Stack is FIFO structure
+type Stack interface {
 	Push(interface{})
 	Pop() (interface{}, error)
 	Size() int
 	IsEmpty() bool
 }
 
-type arrayQueue struct {
+type arrayStack struct {
 	locker sync.RWMutex
 	data   []interface{}
 }
 
-// NewArrayQueue create a queue by array
-func NewArrayQueue() Queue {
-	return &arrayQueue{}
+// NewArrayStack create a queue by array
+func NewArrayStack() Stack {
+	return &arrayStack{}
 }
 
-func (q *arrayQueue) Push(item interface{}) {
+func (q *arrayStack) Push(item interface{}) {
 	q.locker.Lock()
 	defer q.locker.Unlock()
 	q.data = append(q.data, item)
 }
 
-func (q *arrayQueue) Pop() (interface{}, error) {
+func (q *arrayStack) Pop() (interface{}, error) {
 	q.locker.Lock()
 	defer q.locker.Unlock()
 	size := len(q.data)
@@ -44,13 +44,13 @@ func (q *arrayQueue) Pop() (interface{}, error) {
 	return item, nil
 }
 
-func (q *arrayQueue) IsEmpty() bool {
+func (q *arrayStack) IsEmpty() bool {
 	q.locker.RLock()
 	defer q.locker.RUnlock()
 	return len(q.data) == 0
 }
 
-func (q *arrayQueue) Size() int {
+func (q *arrayStack) Size() int {
 	q.locker.RLock()
 	defer q.locker.RUnlock()
 	return len(q.data)
@@ -63,18 +63,18 @@ type node struct {
 	next *node
 }
 
-type linkQueue struct {
+type linkStack struct {
 	locker sync.RWMutex
 	first  *node
 	size   int
 }
 
-// NewLinkQueue implement queue by link
-func NewLinkQueue() Queue {
-	return &linkQueue{}
+// NewLinkStack implement queue by link
+func NewLinkStack() Stack {
+	return &linkStack{}
 }
 
-func (q *linkQueue) Push(item interface{}) {
+func (q *linkStack) Push(item interface{}) {
 	q.locker.Lock()
 	defer q.locker.Unlock()
 	n := &node{
@@ -89,7 +89,7 @@ func (q *linkQueue) Push(item interface{}) {
 	q.size++
 }
 
-func (q *linkQueue) Pop() (interface{}, error) {
+func (q *linkStack) Pop() (interface{}, error) {
 	q.locker.Lock()
 	defer q.locker.Unlock()
 	size := q.size
@@ -102,13 +102,13 @@ func (q *linkQueue) Pop() (interface{}, error) {
 	return item, nil
 }
 
-func (q *linkQueue) IsEmpty() bool {
+func (q *linkStack) IsEmpty() bool {
 	q.locker.RLock()
 	defer q.locker.RUnlock()
 	return q.size == 0
 }
 
-func (q *linkQueue) Size() int {
+func (q *linkStack) Size() int {
 	q.locker.RLock()
 	defer q.locker.RUnlock()
 	return q.size
