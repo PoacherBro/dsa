@@ -1,11 +1,14 @@
 package bag_test
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
 	"github.com/PoacherBro/dsa/datastrutctures/bag"
 )
+
+var breakIteration = errors.New("break iteration")
 
 // go test -v -timeout 3s -run ^TestArrayBag$
 func TestArrayBag(t *testing.T) {
@@ -21,7 +24,9 @@ func TestArrayBag(t *testing.T) {
 		t.Error("bag should not be empty")
 	}
 
-	for item := range b.Iterator() {
+	iterateCb := func(item interface{}) error {
 		fmt.Println(item)
+		return nil
 	}
+	b.Iterate(iterateCb)
 }

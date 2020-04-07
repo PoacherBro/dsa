@@ -1,13 +1,18 @@
 package bag
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/PoacherBro/dsa/pattern/iterable"
+)
 
 // Bag structure will store unsorted items
 type Bag interface {
+	iterable.CallbackIterable
+
 	Add(interface{})
 	Empty() bool
 	Size() int
-	Iterator() []interface{} // used for a standard iterator for golang
 }
 
 // =================== implement Array start ===============================
@@ -42,10 +47,14 @@ func (b *arrBag) Size() int {
 	return b.size
 }
 
-func (b *arrBag) Iterator() []interface{} {
+func (b *arrBag) Iterate(cb iterable.Callback) {
 	b.locker.RLock()
 	defer b.locker.RUnlock()
-	return b.data
+	for _, item := range b.data {
+		if err := cb(item); err != nil {
+			return
+		}
+	}
 }
 
 // =================== implement Array end ===============================
