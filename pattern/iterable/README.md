@@ -1,8 +1,6 @@
 # Golang Iterator 设计
 
-之前看到一篇文章说数据结构底层其实只有数据与链表，所以在实现 `Bag` 数据结构时想使用数组或者链表分别实现，但是在设计 API 时发现，如何提供一个通用的遍历方式给第三方调用？  
-
-不像 Java，Golang 并未提供一个迭代接口，只是原生语法上支持对一些容器的遍历，如下所示：  
+之前看到一篇文章说数据结构底层其实只有数组与链表，所以在实现 `Bag` 这个数据结构时想使用数组和链表来分别实现，但是在设计 `Bag` API 时发现，该如何提供一个通用的遍历方式给第三方调用？因为不像 Java，Golang 并未提供一个迭代接口，只是原生语法上支持对一些容器的遍历，如下所示：  
 
 ```go
 // 如果 container 是数组或者 Slice，那么 k => index，v => 数组元素；
@@ -15,9 +13,10 @@ for item := range channel {
 }
 ```
 
-所以对于迭代器，需要设计一个通用的结构，这也是使用 Golang 来实现一些数据结构时比较重要的。  
+所以对于自定义结构，需要设计一个通用的 API 进行遍历，即 Iterator 模式。  
+对于 Golang 来实现一些数据结构，Iterator 模式是比较重要的。  
 
-先设定 `Bag` 两种不同底层存储结构的定义：  
+这里先设定 `Bag` 两种不同底层存储结构的定义：  
 ```go
 // 使用数组做底层存储
 type arrBag struct {
@@ -50,8 +49,11 @@ type IterableCallback func(interface{}) error
 type Iterable interface {
     Iterator(IterableCallback)
 }
+```
 
-// 然后在对象中实现对应的 Iterator() 
+然后在对象中实现对应的 Iterator() 方法，改方法接受 callback 函数作为参数，默认会把 `Bag` 的每个数据迭代然后作为 callbak 参数传入，如果 callback 返回 `error`，那么就会中断迭代。  
+
+```go
 // Array Bag
 func (b *arrBag) Iterator(cb IterableCallback) {
     var err error
@@ -98,11 +100,11 @@ b.Iterator(func(i interface{}) error {
 })
 ```
 
-这种实现方式简单明了，利用 Golang 的函数编程特性，但有一个不好的点是已经定义好函数类型以及参数类型，不太好扩展。
+这种实现方式简单明了，很好的利用 Golang 的函数编程特性，但有一个不好的点是需预先定义好函数类型以及参数类型，不太好扩展。不过整体看这个无伤大雅，毕竟大部分情况是可以满足的。  
 
 ## 模式2：闭包
 
-类似 Python 或 JavaScript 的 generator 方式，使用闭包来控制访问进度。  
+类似 Python 或 JavaScript 的 generator 方式，使用闭包来控制迭代进度。  
 
 ```go
 // For Array underlying implementation
@@ -155,7 +157,7 @@ type ChanIterable interface {
 }
 ```
 
-这里的 `context` 主要是为了控制终止迭代，也可以使用特定的 `chan`。虽然 Golang 推荐使用 `context` 作为 API 设计的第一个参数，但是这里感觉其实使用 `chan` 更好，因为调用者会有意识的做 `close(chan)` 动作，而对于 `context`，估计会漏掉 cancel context 操作。
+这里的 `context` 主要是为了控制终止迭代，也可以使用特定的 `chan`，譬如 `stop := make(chan struct{})`，把 `stop` 传入。虽然 Golang 推荐使用 `context` 作为 API 设计的第一个参数，但是这里感觉其实使用 `chan` 更好，因为调用者会有意识的做 `close(chan)` 动作，而对于 `context`，估计会漏掉 cancel context 操作。
 
 方法定义：  
 
@@ -301,7 +303,12 @@ for it.HasNext() {
 
 ## 总结
 
-从最初的目的：实现统一的 iterator API 来看，以上四种实现方式从 API 设计上都无可挑剔。最后通过 Golang 的 benchmark 来对比四种实现方式哪种更优。  
+从最初的目的：实现统一的 iterator API 来看，以上四种实现方式从 API 设计上都无可挑剔。  
+
+在参考的几篇文章里，有些实现方法都有一个通用问题，就是改如何保证中断遍历时能很好的回收资源，譬如使用 `chan` 模式的时候，内部实现改如何在最后 `close` 掉。  
+但在上面实现的几种模式里，都保证最后能资源回收，不会出现此类问题。  
+
+最后通过 Golang 的 benchmark 来对比四种实现方式哪种更优。  
 
 ```shell
 #  go test -benchmem -bench ^Benchmark -run ^$
@@ -315,8 +322,8 @@ BenchmarkIterateBag_Objective_Array-8            278       4335142 ns/op        
 BenchmarkIterateBag_Objective_Link-8             240       4364060 ns/op           8 B/op           1 allocs/op
 ```
 
-从性能上看，使用 callback 方式更优，且没有额外的内存分配，并且 interface 设计更为简单直观。  
-对于使用 chan 性能更差，感觉虽然只有两个 goroutine 存在，但是对于 chan 的分配以及 goroutine 调度，还是有一点影响性能的。  
+从性能上看，使用 callback 方式更优，且没有额外的内存分配，并且 interface 设计更为简单、优雅。  
+对于使用 chan 性能更差，觉得主要原因是虽然只有两个 goroutine 存在，但是对于 chan 的分配以及 goroutine 调度，对性能还是有点影响。  
 
 
 ## 参考  
