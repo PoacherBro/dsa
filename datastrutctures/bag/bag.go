@@ -11,7 +11,7 @@ type Bag interface {
 	iterable.CallbackIterable
 
 	Add(interface{})
-	Empty() bool
+	IsEmpty() bool
 	Size() int
 }
 
@@ -37,7 +37,7 @@ func (b *arrBag) Add(item interface{}) {
 	b.size++
 }
 
-func (b *arrBag) Empty() bool {
+func (b *arrBag) IsEmpty() bool {
 	return b.size == 0
 }
 
@@ -73,12 +73,47 @@ type node struct {
 }
 
 // NewLinkBag create a `Bag` which is implemented by link underline
-// func NewLinkBag() Bag {
-// 	return &linkBag{}
-// }
+func NewLinkBag() Bag {
+	return &linkBag{}
+}
 
-// func (b *linkBag) Add(item interface{}) {
-// 	b.locker.Lock()
-// 	defer b.locker.Unlock()
+func (b *linkBag) Add(item interface{}) {
+	b.locker.Lock()
+	defer b.locker.Unlock()
+	if b.first == nil {
+		b.first = &node{
+			data:  item,
+			index: 0,
+		}
+	} else {
+		n := &node{
+			data:  item,
+			index: b.first.index + 1,
+			next:  b.first,
+		}
+		b.first = n
+	}
+	b.size++
+}
 
-// }
+func (b *linkBag) Size() int {
+	b.locker.RLock()
+	defer b.locker.RUnlock()
+	return b.size
+}
+
+func (b *linkBag) IsEmpty() bool {
+	b.locker.RLock()
+	defer b.locker.RUnlock()
+	return b.first == nil
+}
+
+func (b *linkBag) Iterate(cb iterable.Callback) {
+	n := b.first
+	for n != nil {
+		if err := cb(n); err != nil {
+			return
+		}
+		n = n.next
+	}
+}
