@@ -8,7 +8,7 @@ import (
 
 // go test -v -timeout 3s -run ^TestArrayStack$
 func TestArrayStack(t *testing.T) {
-	q := stack.NewArrayStack()
+	q := stack.NewArrayStack(10)
 	testStack(q, t)
 }
 

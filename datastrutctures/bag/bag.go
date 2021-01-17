@@ -15,6 +15,11 @@ type Bag interface {
 	Size() int
 }
 
+var (
+	_ Bag = &arrBag{}
+	_ Bag = &linkBag{}
+)
+
 // =================== implement Array start ===============================
 type arrBag struct {
 	locker sync.RWMutex
@@ -23,8 +28,13 @@ type arrBag struct {
 }
 
 // NewArrayBag create a `Bag` which is implemented by array underline
-func NewArrayBag() Bag {
-	return &arrBag{}
+func NewArrayBag(cap int) Bag {
+	if cap <= 0 {
+		cap = 16
+	}
+	return &arrBag{
+		data: make([]interface{}, 0, 16),
+	}
 }
 
 func (b *arrBag) Add(item interface{}) {

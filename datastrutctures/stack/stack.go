@@ -16,14 +16,24 @@ type Stack interface {
 	IsEmpty() bool
 }
 
+var (
+	_ Stack = &arrayStack{}
+	_ Stack = &linkStack{}
+)
+
 type arrayStack struct {
 	locker sync.RWMutex
 	data   []interface{}
 }
 
 // NewArrayStack create a queue by array
-func NewArrayStack() Stack {
-	return &arrayStack{}
+func NewArrayStack(cap int) Stack {
+	if cap <= 0 {
+		cap = 16
+	}
+	return &arrayStack{
+		data: make([]interface{}, 0, cap),
+	}
 }
 
 func (q *arrayStack) Push(item interface{}) {

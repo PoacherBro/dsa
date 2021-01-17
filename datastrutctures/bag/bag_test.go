@@ -12,7 +12,7 @@ var breakIteration = errors.New("break iteration")
 
 // go test -v -timeout 3s -run ^TestArrayBag$
 func TestArrayBag(t *testing.T) {
-	b := bag.NewArrayBag()
+	b := bag.NewArrayBag(10)
 	b.Add(1)
 	b.Add(2)
 	size := b.Size()
