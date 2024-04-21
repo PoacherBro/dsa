@@ -1,18 +1,14 @@
 package bag_test
 
 import (
-	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/PoacherBro/dsa/datastrutctures/bag"
 )
 
-var breakIteration = errors.New("break iteration")
-
 // go test -v -timeout 3s -run ^TestArrayBag$
 func TestArrayBag(t *testing.T) {
-	b := bag.NewArrayBag(10)
+	b := bag.NewArrayBag[int](10)
 	b.Add(1)
 	b.Add(2)
 	size := b.Size()
@@ -24,16 +20,16 @@ func TestArrayBag(t *testing.T) {
 		t.Fatal("bag should not be empty")
 	}
 
-	iterateCb := func(item interface{}) error {
-		fmt.Println(item)
-		return nil
-	}
-	b.Iterate(iterateCb)
+	// iterateCb := func(item interface{}) bool {
+	// 	fmt.Println(item)
+	// 	return false
+	// }
+	// b.Iterate(iterateCb)
 }
 
 // go test -v -timeout 3s -run ^TestLinkBag$
 func TestLinkBag(t *testing.T) {
-	b := bag.NewLinkBag()
+	b := bag.NewLinkBag[int]()
 	l := 10
 	for i := 0; i < l; i++ {
 		b.Add(i)
@@ -48,9 +44,20 @@ func TestLinkBag(t *testing.T) {
 		t.Fatal("bag should not be empty")
 	}
 
-	iterateCb := func(item interface{}) error {
-		fmt.Println(item)
-		return nil
-	}
-	b.Iterate(iterateCb)
+	// iterateCb := func(item interface{}) bool {
+	// 	fmt.Println(item)
+	// 	return false
+	// }
+	// b.Iterate(iterateCb)
 }
+
+func BenchmarkArrayBag(b *testing.B) {
+	b.Run("test add item into Array Bag", func(b *testing.B) {
+		ab := bag.NewArrayBag[int](1000)
+		for i := 0; i < b.N; i++ {
+			ab.Add(i)
+		}
+	})
+}
+
+// BenchmarkArrayBag/test_add_item_into_Array_Bag-8         	43594042	        26.64 ns/op	      71 B/op	       0 allocs/op

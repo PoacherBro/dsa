@@ -1,8 +1,8 @@
 package iterable
 
-type Callback func(interface{}) error
+type CallbackFn func(item any) bool
 
 // CallbackIterable iterate all items based on passed callback, will break when return error from callback
 type CallbackIterable interface {
-	Iterate(Callback) // if return error, then break the iterator
+	Iterate(CallbackFn) // if `CallBackFn` return error, then break the iterator
 }

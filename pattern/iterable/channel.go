@@ -3,6 +3,6 @@ package iterable
 import "context"
 
 // ChanIterable iterate all items when context.Done()
-type ChanIterable interface {
-	Chan(context.Context) chan interface{}
+type ChanIterable[T any] interface {
+	Chan(context.Context) chan T
 }
