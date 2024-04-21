@@ -2,8 +2,6 @@ package bag
 
 import (
 	"sync"
-
-	"github.com/PoacherBro/dsa/pattern/iterable"
 )
 
 // Bag structure will store unsorted items
@@ -55,17 +53,14 @@ func (b *arrBag[T]) Size() int {
 }
 
 func (b *arrBag[T]) IsExists(item T) bool {
-	return false
-}
-
-func (b *arrBag[T]) Iterate(cb iterable.CallbackFn) {
 	b.locker.RLock()
 	defer b.locker.RUnlock()
-	for _, item := range b.data {
-		if isBreak := cb(item); isBreak {
-			return
+	for _, d := range b.data {
+		if d == item {
+			return true
 		}
 	}
+	return false
 }
 
 // =================== implement Array end ===============================
@@ -73,14 +68,15 @@ func (b *arrBag[T]) Iterate(cb iterable.CallbackFn) {
 // =================== implement Link start ===============================
 type linkBag[T comparable] struct {
 	locker sync.RWMutex
-	first  *node[T]
+	head   *node[T]
+	tail   *node[T]
 	size   int
 }
 
 type node[T comparable] struct {
-	data  T
-	next  *node[T]
-	index int
+	data T
+	pre  *node[T]
+	next *node[T]
 }
 
 // NewLinkBag create a `Bag` which is implemented by link underline
@@ -91,18 +87,19 @@ func NewLinkBag[T comparable]() Bag[T] {
 func (b *linkBag[T]) Add(item T) {
 	b.locker.Lock()
 	defer b.locker.Unlock()
-	if b.first == nil {
-		b.first = &node[T]{
-			data:  item,
-			index: 0,
-		}
+	n := &node[T]{
+		data: item,
+		pre:  nil,
+		next: nil,
+	}
+
+	if b.head == nil {
+		b.head = n
+		b.tail = n
 	} else {
-		n := &node[T]{
-			data:  item,
-			index: b.first.index + 1,
-			next:  b.first,
-		}
-		b.first = n
+		n.pre = b.tail
+		b.tail.next = n
+		b.tail = n
 	}
 	b.size++
 }
@@ -116,19 +113,23 @@ func (b *linkBag[T]) Size() int {
 func (b *linkBag[T]) IsEmpty() bool {
 	b.locker.RLock()
 	defer b.locker.RUnlock()
-	return b.first == nil
+	return b.head == nil
 }
 
 func (b *linkBag[T]) IsExists(item T) bool {
-	return false
-}
+	b.locker.RLock()
+	defer b.locker.RUnlock()
 
-func (b *linkBag[T]) Iterate(cb iterable.CallbackFn) {
-	n := b.first
-	for n != nil {
-		if isBreak := cb(n); isBreak {
-			return
-		}
-		n = n.next
+	if b.size == 0 {
+		return false
 	}
+	h, t := b.head, b.tail
+	for i := 0; i <= b.size/2; i++ {
+		if h.data == item || t.data == item {
+			return true
+		}
+		h = h.next
+		t = t.pre
+	}
+	return false
 }

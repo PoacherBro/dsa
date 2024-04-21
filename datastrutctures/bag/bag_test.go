@@ -51,6 +51,24 @@ func TestLinkBag(t *testing.T) {
 	// b.Iterate(iterateCb)
 }
 
+func TestLinkBag_IsExists(t *testing.T) {
+	b := bag.NewLinkBag[int]()
+	b.Add(1)
+	b.Add(39)
+	b.Add(4)
+	b.Add(22)
+	b.Add(-1)
+	b.Add(3)
+
+	if b.IsExists(30) {
+		t.Fatal("Bag has not 30, but find it")
+	}
+
+	if !b.IsExists(4) {
+		t.Fatal("Bag has 4, but not find it")
+	}
+}
+
 func BenchmarkArrayBag(b *testing.B) {
 	b.Run("test add item into Array Bag", func(b *testing.B) {
 		ab := bag.NewArrayBag[int](1000)
