@@ -1,10 +1,5 @@
 package linkedlist
 
-import (
-	"fmt"
-	"strings"
-)
-
 type LinkNode[T comparable] struct {
 	next *LinkNode[T]
 	data T
@@ -71,12 +66,4 @@ func (ll *LinkedList[T]) Find(item T) bool {
 		}
 	}
 	return false
-}
-
-func (ll *LinkedList[T]) String() string {
-	var buff strings.Builder
-	for c := ll.head; c != nil; c = c.next {
-		buff.WriteString(fmt.Sprintf("%v", c.data))
-	}
-	return buff.String()
 }
